@@ -1,0 +1,243 @@
+From 837d3d3b05deaecf04a639ae26382b7391c4cd9d Mon Sep 17 00:00:00 2001
+From: Kevin <kw22@princeton.edu>
+Date: Sat, 9 Jan 2021 18:50:55 -0500
+Subject: [PATCH] patch for personal changes
+
+---
+ dmenu/config.h   | 23 ++++++++++++++
+ dmenu/dmenu.1    | 80 ++++++++++++++++++++++++------------------------
+ dmenu/dmenu_path |  2 +-
+ dmenu/drw.c      |  3 ++
+ 4 files changed, 67 insertions(+), 41 deletions(-)
+ create mode 100644 dmenu/config.h
+
+diff --git a/dmenu/config.h b/dmenu/config.h
+new file mode 100644
+index 0000000..1edb647
+--- /dev/null
++++ b/dmenu/config.h
+@@ -0,0 +1,23 @@
++/* See LICENSE file for copyright and license details. */
++/* Default settings; can be overriden by command line. */
++
++static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
++/* -fn option overrides fonts[0]; default X11 font or font set */
++static const char *fonts[] = {
++	"monospace:size=10"
++};
++static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
++static const char *colors[SchemeLast][2] = {
++	/*     fg         bg       */
++	[SchemeNorm] = { "#bbbbbb", "#222222" },
++	[SchemeSel] = { "#eeeeee", "#005577" },
++	[SchemeOut] = { "#000000", "#00ffff" },
++};
++/* -l option; if nonzero, dmenu uses vertical list with given number of lines */
++static unsigned int lines      = 0;
++
++/*
++ * Characters not considered part of a word while deleting words
++ * for example: " /?\"&[]"
++ */
++static const char worddelimiters[] = " ";
+diff --git a/dmenu/dmenu.1 b/dmenu/dmenu.1
+index 323f93c..b294e44 100644
+--- a/dmenu/dmenu.1
++++ b/dmenu/dmenu.1
+@@ -27,8 +27,8 @@ dmenu \- dynamic menu
+ .SH DESCRIPTION
+ .B dmenu
+ is a dynamic menu for X, which reads a list of newline\-separated items from
+-stdin.  When the user selects an item and presses Return, their choice is printed
+-to stdout and dmenu terminates.  Entering text will narrow the items to those
++stdin. When the user selects an item and presses Return, their choice is printed
++to stdout and dmenu terminates. Entering text will narrow the items to those
+ matching the tokens in the input.
+ .P
+ .B dmenu_run
+@@ -81,113 +81,113 @@ prints version information to stdout, then exits.
+ .BI \-w " windowid"
+ embed into windowid.
+ .SH USAGE
+-dmenu is completely controlled by the keyboard.  Items are selected using the
++dmenu is completely controlled by the keyboard. Items are selected using the
+ arrow keys, page up, page down, home, and end.
+ .TP
+ .B Tab
+ Copy the selected item to the input field.
+ .TP
+ .B Return
+-Confirm selection.  Prints the selected item to stdout and exits, returning
++Confirm selection. Prints the selected item to stdout and exits, returning
+ success.
+ .TP
+-.B Ctrl-Return
+-Confirm selection.  Prints the selected item to stdout and continues.
++.B Ctrl+Return
++Confirm selection. Prints the selected item to stdout and continues.
+ .TP
+-.B Shift\-Return
+-Confirm input.  Prints the input text to stdout and exits, returning success.
++.B Shift+Return
++Confirm input. Prints the input text to stdout and exits, returning success.
+ .TP
+ .B Escape
+ Exit without selecting an item, returning failure.
+ .TP
+-.B Ctrl-Left
++.B Ctrl+Left
+ Move cursor to the start of the current word
+ .TP
+-.B Ctrl-Right
++.B Ctrl+Right
+ Move cursor to the end of the current word
+ .TP
+-.B C\-a
++.B Ctrl+a
+ Home
+ .TP
+-.B C\-b
++.B Ctrl+b
+ Left
+ .TP
+-.B C\-c
++.B Ctrl+c
+ Escape
+ .TP
+-.B C\-d
++.B Ctrl+d
+ Delete
+ .TP
+-.B C\-e
++.B Ctrl+e
+ End
+ .TP
+-.B C\-f
++.B Ctrl+f
+ Right
+ .TP
+-.B C\-g
++.B Ctrl+g
+ Escape
+ .TP
+-.B C\-h
++.B Ctrl+h
+ Backspace
+ .TP
+-.B C\-i
++.B Ctrl+i
+ Tab
+ .TP
+-.B C\-j
++.B Ctrl+j
+ Return
+ .TP
+-.B C\-J
+-Shift-Return
++.B Ctrl+J
++Shift+Return
+ .TP
+-.B C\-k
++.B Ctrl+k
+ Delete line right
+ .TP
+-.B C\-m
++.B Ctrl+m
+ Return
+ .TP
+-.B C\-M
+-Shift-Return
++.B Ctrl+M
++Shift+Return
+ .TP
+-.B C\-n
++.B Ctrl+n
+ Down
+ .TP
+-.B C\-p
++.B Ctrl+p
+ Up
+ .TP
+-.B C\-u
++.B Ctrl+u
+ Delete line left
+ .TP
+-.B C\-w
++.B Ctrl+w
+ Delete word left
+ .TP
+-.B C\-y
++.B Ctrl+y
+ Paste from primary X selection
+ .TP
+-.B C\-Y
++.B Ctrl+Y
+ Paste from X clipboard
+ .TP
+-.B M\-b
++.B M+b
+ Move cursor to the start of the current word
+ .TP
+-.B M\-f
++.B M+f
+ Move cursor to the end of the current word
+ .TP
+-.B M\-g
++.B M+g
+ Home
+ .TP
+-.B M\-G
++.B M+G
+ End
+ .TP
+-.B M\-h
++.B M+h
+ Up
+ .TP
+-.B M\-j
++.B M+j
+ Page down
+ .TP
+-.B M\-k
++.B M+k
+ Page up
+ .TP
+-.B M\-l
++.B M+l
+ Down
+ .SH SEE ALSO
+ .IR dwm (1),
+diff --git a/dmenu/dmenu_path b/dmenu/dmenu_path
+index 3a7cda7..607297f 100755
+--- a/dmenu/dmenu_path
++++ b/dmenu/dmenu_path
+@@ -1,6 +1,6 @@
+ #!/bin/sh
+
+-cachedir="${XDG_CACHE_HOME:-"$HOME/.cache"}"
++cachedir=${TMPDIR:-/tmp}
+ cache="$cachedir/dmenu_run"
+
+ [ ! -e "$cachedir" ] && mkdir -p "$cachedir"
+diff --git a/dmenu/drw.c b/dmenu/drw.c
+index 4cdbcbe..9343c5a 100644
+--- a/dmenu/drw.c
++++ b/dmenu/drw.c
+@@ -140,11 +140,14 @@ xfont_create(Drw *drw, const char *fontname, FcPattern *fontpattern)
+ 	 * https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=916349
+ 	 * and lots more all over the internet.
+ 	 */
++    // comment out to allow emojis
++    /*
+ 	FcBool iscol;
+ 	if(FcPatternGetBool(xfont->pattern, FC_COLOR, 0, &iscol) == FcResultMatch && iscol) {
+ 		XftFontClose(drw->dpy, xfont);
+ 		return NULL;
+ 	}
++    */
+
+ 	font = ecalloc(1, sizeof(Fnt));
+ 	font->xfont = xfont;
+--
+2.30.0
+

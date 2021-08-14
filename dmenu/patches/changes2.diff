@@ -1,0 +1,26 @@
+From 4e69f7ab5aa086bc4277221c7286680c97ecf998 Mon Sep 17 00:00:00 2001
+From: Kevin <kw22@princeton.edu>
+Date: Sun, 10 Jan 2021 15:48:59 -0500
+Subject: [PATCH] patch for personal settings
+
+---
+ dmenu/config.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/dmenu/config.h b/dmenu/config.h
+index d640c61..dc30cd0 100644
+--- a/dmenu/config.h
++++ b/dmenu/config.h
+@@ -7,7 +7,8 @@ static int min_width = 500;                 /* minimum width when centered */
+ static int fuzzy = 0;                       /* -F option; if 1, dmenu uses fuzzy matching */
+ /* -fn option overrides fonts[0]; default X11 font or font set */
+ static const char *fonts[] = {
+-	"monospace:size=10"
++	"CaskaydiaCove Nerd Font:size=11:antialias=true:autohint=false",
++	"Noto Color Emoji:size=11:antialias=true:autohint=false"
+ };
+ static const char *prompt      = NULL;      /* -p  option; prompt to the left of input field */
+ static const char *colors[SchemeLast][2] = {
+--
+2.30.0
+

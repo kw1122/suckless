@@ -1,0 +1,45 @@
+From 75e88fc971c457961ae006c81f8fe3e0b98b0321 Mon Sep 17 00:00:00 2001
+From: Kevin <kw22@princeton.edu>
+Date: Sun, 10 Jan 2021 14:49:18 -0500
+Subject: [PATCH] patch for pasting
+
+---
+ dmenu/dmenu.1 | 4 ++--
+ dmenu/dmenu.c | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/dmenu/dmenu.1 b/dmenu/dmenu.1
+index 2bd334a..ef0522f 100644
+--- a/dmenu/dmenu.1
++++ b/dmenu/dmenu.1
+@@ -171,10 +171,10 @@ Delete line left
+ .B Ctrl+w
+ Delete word left
+ .TP
+-.B Ctrl+y
++.B Ctrl+v
+ Paste from primary X selection
+ .TP
+-.B Ctrl+Y
++.B Ctrl+V
+ Paste from X clipboard
+ .TP
+ .B M+b
+diff --git a/dmenu/dmenu.c b/dmenu/dmenu.c
+index b0aa8e1..d65d3a7 100644
+--- a/dmenu/dmenu.c
++++ b/dmenu/dmenu.c
+@@ -451,8 +451,8 @@ keypress(XKeyEvent *ev)
+ 			while (cursor > 0 && !strchr(worddelimiters, text[nextrune(-1)]))
+ 				insert(NULL, nextrune(-1) - cursor);
+ 			break;
+-		case XK_y: /* paste selection */
+-		case XK_Y:
++		case XK_v: /* paste selection */
++		case XK_V:
+ 			XConvertSelection(dpy, (ev->state & ShiftMask) ? clip : XA_PRIMARY,
+ 			                  utf8, utf8, win, CurrentTime);
+ 			return;
+-- 
+2.30.0
+

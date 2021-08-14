@@ -1,0 +1,84 @@
+From 342e52b9b2801de238966715ad877383f46c2aa1 Mon Sep 17 00:00:00 2001
+From: Kevin <kw22@princeton.edu>
+Date: Sat, 9 Jan 2021 19:13:00 -0500
+Subject: [PATCH] border patch
+
+---
+ dmenu/config.h | 3 +++
+ dmenu/dmenu.1  | 5 +++++
+ dmenu/dmenu.c  | 9 +++++++--
+ 3 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/dmenu/config.h b/dmenu/config.h
+index 1edb647..dd3eb31 100644
+--- a/dmenu/config.h
++++ b/dmenu/config.h
+@@ -21,3 +21,6 @@ static unsigned int lines      = 0;
+  * for example: " /?\"&[]"
+  */
+ static const char worddelimiters[] = " ";
++
++/* Size of the window border */
++static unsigned int border_width = 0;
+diff --git a/dmenu/dmenu.1 b/dmenu/dmenu.1
+index b294e44..891997e 100644
+--- a/dmenu/dmenu.1
++++ b/dmenu/dmenu.1
+@@ -22,6 +22,8 @@ dmenu \- dynamic menu
+ .IR color ]
+ .RB [ \-w
+ .IR windowid ]
++.RB [ \-bw
++.IR width ]
+ .P
+ .BR dmenu_run " ..."
+ .SH DESCRIPTION
+@@ -80,6 +82,9 @@ prints version information to stdout, then exits.
+ .TP
+ .BI \-w " windowid"
+ embed into windowid.
++.TP
++.BI \-bw " width"
++defines the window border width.
+ .SH USAGE
+ dmenu is completely controlled by the keyboard. Items are selected using the
+ arrow keys, page up, page down, home, and end.
+diff --git a/dmenu/dmenu.c b/dmenu/dmenu.c
+index 65f25ce..7e9ffc9 100644
+--- a/dmenu/dmenu.c
++++ b/dmenu/dmenu.c
+@@ -659,9 +659,11 @@ setup(void)
+ 	swa.override_redirect = True;
+ 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
+ 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask;
+-	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, 0,
++	win = XCreateWindow(dpy, parentwin, x, y - (topbar ? 0 : border_width * 2), mw - border_width * 2, mh, border_width,
+ 	                    CopyFromParent, CopyFromParent, CopyFromParent,
+ 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
++	if (border_width)
++		XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
+ 	XSetClassHint(dpy, win, &ch);
+ 
+ 
+@@ -690,7 +692,8 @@ static void
+ usage(void)
+ {
+ 	fputs("usage: dmenu [-bfiv] [-l lines] [-p prompt] [-fn font] [-m monitor]\n"
+-	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n", stderr);
++	      "             [-nb color] [-nf color] [-sb color] [-sf color] [-w windowid]\n"
++	      "             [-bw width]\n", stderr);
+ 	exit(1);
+ }
+ 
+@@ -733,6 +736,8 @@ main(int argc, char *argv[])
+ 			colors[SchemeSel][ColFg] = argv[++i];
+ 		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+ 			embed = argv[++i];
++		else if (!strcmp(argv[i], "-bw"))  /* border width */
++			border_width = atoi(argv[++i]);
+ 		else
+ 			usage();
+ 
+-- 
+2.30.0
+
