@@ -1,0 +1,186 @@
+From 57641dd8cc754503b1fe7e7462f3f0f9de13262a Mon Sep 17 00:00:00 2001
+From: Kevin <kw22@princeton.edu>
+Date: Sun, 15 Aug 2021 13:54:30 -0400
+Subject: [PATCH] added st
+
+---
+ st/st.c  | 36 ++++++++++++++++++++++++++++++++----
+ st/win.h |  4 +++-
+ st/x.c   | 42 ++++++++++++++++++++++++++++++++++++++----
+ 3 files changed, 73 insertions(+), 9 deletions(-)
+
+diff --git a/st/st.c b/st/st.c
+index ebdf360..5c1e37d 100644
+--- a/st/st.c
++++ b/st/st.c
+@@ -1808,6 +1808,33 @@ csihandle(void)
+ 			goto unknown;
+ 		}
+ 		break;
++	case 't': /* title stack operations */
++		switch (csiescseq.arg[0]) {
++		case 22: /* pust current title on stack */
++			switch (csiescseq.arg[1]) {
++			case 0:
++			case 1:
++			case 2:
++				xpushtitle();
++				break;
++			default:
++				goto unknown;
++			}
++			break;
++		case 23: /* pop last title from stack */
++			switch (csiescseq.arg[1]) {
++			case 0:
++			case 1:
++			case 2:
++				xsettitle(NULL, 1);
++				break;
++			default:
++				goto unknown;
++			}
++			break;
++		default:
++			goto unknown;
++		}
+ 	}
+ }
+ 
+@@ -1856,7 +1883,7 @@ strhandle(void)
+ 		switch (par) {
+ 		case 0:
+ 			if (narg > 1) {
+-				xsettitle(strescseq.args[1]);
++				xsettitle(strescseq.args[1], 0);
+ 				xseticontitle(strescseq.args[1]);
+ 			}
+ 			return;
+@@ -1866,7 +1893,7 @@ strhandle(void)
+ 			return;
+ 		case 2:
+ 			if (narg > 1)
+-				xsettitle(strescseq.args[1]);
++				xsettitle(strescseq.args[1], 0);
+ 			return;
+ 		case 52:
+ 			if (narg > 2 && allowwindowops) {
+@@ -1902,7 +1929,7 @@ strhandle(void)
+ 		}
+ 		break;
+ 	case 'k': /* old title set compatibility */
+-		xsettitle(strescseq.args[0]);
++		xsettitle(strescseq.args[0], 0);
+ 		return;
+ 	case 'P': /* DCS -- Device Control String */
+ 	case '_': /* APC -- Application Program Command */
+@@ -2274,6 +2301,7 @@ eschandle(uchar ascii)
+ 		break;
+ 	case 'c': /* RIS -- Reset to initial state */
+ 		treset();
++		xfreetitlestack();
+ 		resettitle();
+ 		xloadcols();
+ 		break;
+@@ -2556,7 +2584,7 @@ tresize(int col, int row)
+ void
+ resettitle(void)
+ {
+-	xsettitle(NULL);
++	xsettitle(NULL, 0);
+ }
+ 
+ void
+diff --git a/st/win.h b/st/win.h
+index e6e4369..ef67fd6 100644
+--- a/st/win.h
++++ b/st/win.h
+@@ -31,7 +31,9 @@ void xfinishdraw(void);
+ void xloadcols(void);
+ int xsetcolorname(int, const char *);
+ void xseticontitle(char *);
+-void xsettitle(char *);
++void xfreetitlestack(void);
++void xsettitle(char *, int);
++void xpushtitle(void);
+ int xsetcursor(int);
+ void xsetmode(int, unsigned int);
+ void xsetpointermotion(int);
+diff --git a/st/x.c b/st/x.c
+index 0507e94..43b8d0a 100644
+--- a/st/x.c
++++ b/st/x.c
+@@ -63,6 +63,9 @@ static void ttysend(const Arg *);
+ /* config.h for applying patches and the configuration. */
+ #include "config.h"
+ 
++/* size of title stack */
++#define TITLESTACKSIZE 8
++
+ /* XEMBED messages */
+ #define XEMBED_FOCUS_IN  4
+ #define XEMBED_FOCUS_OUT 5
+@@ -222,6 +225,8 @@ static DC dc;
+ static XWindow xw;
+ static XSelection xsel;
+ static TermWindow win;
++static int tstki; /* title stack index */
++static char *titlestack[TITLESTACKSIZE]; /* title stack */
+ 
+ /* Font Ring Cache */
+ enum {
+@@ -1614,18 +1619,47 @@ xseticontitle(char *p)
+ }
+ 
+ void
+-xsettitle(char *p)
++xfreetitlestack(void)
++{
++	for (int i = 0; i < LEN(titlestack); i++) {
++		free(titlestack[i]);
++		titlestack[i] = NULL;
++	}
++}
++
++void
++xsettitle(char *p, int pop)
+ {
+ 	XTextProperty prop;
+-	DEFAULT(p, opt_title);
+ 
+-	Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle,
+-			&prop);
++	free(titlestack[tstki]);
++	if (pop) {
++		titlestack[tstki] = NULL;
++		tstki = (tstki - 1 + TITLESTACKSIZE) % TITLESTACKSIZE;
++		p = titlestack[tstki] ? titlestack[tstki] : opt_title;
++	} else if (p) {
++		titlestack[tstki] = xstrdup(p);
++	} else {
++		titlestack[tstki] = NULL;
++		p = opt_title;
++	}
++
++	Xutf8TextListToTextProperty(xw.dpy, &p, 1, XUTF8StringStyle, &prop);
+ 	XSetWMName(xw.dpy, xw.win, &prop);
+ 	XSetTextProperty(xw.dpy, xw.win, &prop, xw.netwmname);
+ 	XFree(prop.value);
+ }
+ 
++void
++xpushtitle(void)
++{
++	int tstkin = (tstki + 1) % TITLESTACKSIZE;
++
++	free(titlestack[tstkin]);
++	titlestack[tstkin] = titlestack[tstki] ? xstrdup(titlestack[tstki]) : NULL;
++	tstki = tstkin;
++}
++
+ int
+ xstartdraw(void)
+ {
+-- 
+2.32.0
+
