@@ -39,3 +39,12 @@ Credits
 Based on Aurélien APTEL <aurelien dot aptel at gmail dot com> bt source code.
 ```
 
+This build supports the following:
+
+- terminal background transparency
+- arbitrary terminal resizing
+- multiple fonts
+- inversion of current terminal color scheme
+- terminal scrolling using `Shift+Page Up` &amp; `Shift+Page Down` or the mouse
+- ligatures
+- vertically centered lines for larger `chscale`
