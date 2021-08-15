@@ -5,9 +5,9 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "Liberation Mono:pixelsize=12:antialias=true:autohint=true";
+static char *font = "CaskaydiaCove Nerd Font:size=11:antialias=true:autohint=false";
 /* spare fonts */
-static char *font2[] = { "Liberation Mono:pixelsize=12:antialias=true:autohint=true" };
+static char *font2[] = { "Noto Color Emoji:pixelsize=11:antialias=true:autohint=false" };
 static int borderpx = 2;
 
 /*
@@ -73,7 +73,7 @@ static unsigned int cursorthickness = 2;
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
  * it
  */
-static int bellvolume = 0;
+static int bellvolume = 100;
 
 /* default TERM value */
 char *termname = "st-256color";
@@ -93,14 +93,35 @@ char *termname = "st-256color";
  *
  *	stty tabs
  */
-unsigned int tabspaces = 8;
+unsigned int tabspaces = 4;
 
 /* bg opacity */
-double alpha = 0.6;
+double alpha = 0.8;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
 	/* 8 normal colors */
+	"#1c1c1c", /* black   */
+	"#e64569", /* red     */
+	"#89d287", /* green   */
+	"#dab752", /* yellow  */
+	"#439ecf", /* blue    */
+	"#d961dc", /* magenta */
+	"#64aaaf", /* cyan    */
+	"#b3b3b3", /* white   */
+
+	/* 8 bright colors */
+	"#727272", /* black   */
+	"#e4859a", /* red     */
+	"#a2cca1", /* green   */
+	"#e1e387", /* yellow  */
+	"#6fbbe2", /* blue    */
+	"#e586e7", /* magenta */
+	"#96dcda", /* cyan    */
+	"#dedede", /* white   */
+
+	/* 8 normal colors */
+	/*
 	"black",
 	"red3",
 	"green3",
@@ -109,8 +130,10 @@ static const char *colorname[] = {
 	"magenta3",
 	"cyan3",
 	"gray90",
+	*/
 
 	/* 8 bright colors */
+	/*
 	"gray50",
 	"red",
 	"green",
@@ -119,6 +142,7 @@ static const char *colorname[] = {
 	"magenta",
 	"cyan",
 	"white",
+	*/
 
 	[255] = 0,
 
@@ -199,9 +223,9 @@ static Shortcut shortcuts[] = {
 	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
 	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
 	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-	{ TERMMOD,              XK_Prior,       zoom,           {.f = +1} },
-	{ TERMMOD,              XK_Next,        zoom,           {.f = -1} },
-	{ TERMMOD,              XK_Home,        zoomreset,      {.f =  0} },
+	{ ControlMask,          XK_equal,       zoom,           {.f = +1} },
+	{ ControlMask,          XK_minus,       zoom,           {.f = -1} },
+	{ ControlMask,          XK_0,           zoomreset,      {.f =  0} },
 	{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
 	{ TERMMOD,              XK_V,           clippaste,      {.i =  0} },
 	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
